@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="profile_tab_style" format="reference"/>
+
+    <attr name="backgroundColor" format="color|reference"/>
+
+</resources>
