@@ -2,25 +2,19 @@ package com.raed.twitterclient;
 
 import android.app.Application;
 
-import com.raed.twitterclient.di.AppComponent;
-import com.raed.twitterclient.di.ContextModule;
-import com.raed.twitterclient.di.DaggerAppComponent;
+import com.raed.twitterclient.retrofitservices.RetrofitServices;
+import com.raed.twitterclient.userdata.CurrentUser;
+import com.raed.twitterclient.userdata.Users;
 
 public class MyApplication extends Application {
-
-    private AppComponent mAppComponent;
 
     @Override
     public void onCreate() {
         super.onCreate();
-
-        mAppComponent = DaggerAppComponent
-                .builder()
-                .contextModule(new ContextModule(this))
-                .build();
+        Users.initializeInstance(this);
+        CurrentUser.initializeInstance(this);
+        RetrofitServices.initializeInstance();
     }
 
-    public AppComponent getAppComponent() {
-        return mAppComponent;
-    }
 }
+

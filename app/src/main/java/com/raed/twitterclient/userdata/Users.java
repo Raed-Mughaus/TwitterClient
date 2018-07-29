@@ -1,39 +1,37 @@
 package com.raed.twitterclient.userdata;
 
+import android.content.Context;
 import android.support.annotation.MainThread;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.raed.twitterclient.utilis.Crashlytics;
 import com.raed.twitterclient.utilis.StringFile;
 
+import java.io.File;
 import java.lang.reflect.Type;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.ECKey;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
-import javax.inject.Inject;
-import javax.inject.Named;
 
 
 public class Users {
 
-    private static final String ENCRYPTION_KEY = "ThisIsAKeyToEncr";
-    static final String FILE_NAME = "users";
+    private static final String FILE_NAME = "users";
+    private static Users sUsers;
 
     private final StringFile mUsersFile;
 
-    @Inject
-    public Users(@Named(FILE_NAME) StringFile stringFile) {
-        mUsersFile = stringFile;
+    public static Users getInstance(){
+        return sUsers;
+    }
+
+    public static void initializeInstance(Context context){
+        sUsers = new Users(context);
+    }
+
+    private Users(Context context) {
+        File file = new File(context.getFilesDir(), FILE_NAME);
+        mUsersFile = new StringFile(file);
     }
 
     @MainThread

@@ -1,25 +1,22 @@
 package com.raed.twitterclient.profile;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -27,9 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.raed.twitterclient.MyApplication;
 import com.raed.twitterclient.R;
-import com.raed.twitterclient.di.AppComponent;
 import com.raed.twitterclient.hashtaghelper.HashTagHelper;
 
 import java.util.Objects;
@@ -40,6 +35,8 @@ import io.reactivex.disposables.Disposable;
 public class ProfileActivity extends AppCompatActivity {
 
     private static final String TAG = "ProfileFragment";
+
+    private static final String KEY_USER_ID = "user_id";
 
     private ProfileViewModel mViewModel;
 
@@ -59,6 +56,12 @@ public class ProfileActivity extends AppCompatActivity {
     private Button mFollowButton;
     private ImageButton mDMButton;
 
+    public static Intent newIntent(Context context, String userID){
+        Intent intent = new Intent(context, ProfileActivity.class);
+        intent.putExtra(KEY_USER_ID, userID);
+        return intent;
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,9 +79,9 @@ public class ProfileActivity extends AppCompatActivity {
                 }
         );
 
-        AppComponent appComponent = ((MyApplication) getApplication()).getAppComponent();
-        ProfileViewModelFactory factory = new ProfileViewModelFactory(appComponent);
-        mViewModel = ViewModelProviders.of(this, factory).get(ProfileViewModel.class);
+        mViewModel = ViewModelProviders
+                .of(this)
+                .get(ProfileViewModel.class);
         /*mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(new StringAdapter());*/
@@ -130,20 +133,20 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     //todo have a look at Glide page to see how to use it with RecyclerView
-    private void updateUI(User user){
+    private void updateUI(UserProfile userProfile){
         Glide.with(Objects.requireNonNull(this))
-                .load(user.getBannerImage())
+                .load(userProfile.getBannerImage())
                 .into(mBannerImageView);
 
         Glide.with(Objects.requireNonNull(this))
-                .load(user.getProfileImage().replace("_normal", ""))
+                .load(userProfile.getProfileImage().replace("_normal", ""))
                 .into(mProfileImageView);
 
-        mNameView.setText(user.getName());
-        mScreenNameView.setText(getString(R.string.username_prefix, user.getScreenName()));
+        mNameView.setText(userProfile.getName());
+        mScreenNameView.setText(getString(R.string.username_prefix, userProfile.getScreenName()));
 
-        if (user.getDescription() != null) {
-            mDescriptionView.setText(user.getDescription());
+        if (userProfile.getDescription() != null) {
+            mDescriptionView.setText(userProfile.getDescription());
             HashTagHelper hashTagHelper = HashTagHelper
                     .Creator.create(0xff2187bb,
                             hashTag -> Toast.makeText(ProfileActivity.this, hashTag,
@@ -151,30 +154,30 @@ public class ProfileActivity extends AppCompatActivity {
             hashTagHelper.handle(mDescriptionView);
         }
 
-        if (user.getLocation() != null)
-            mLocationView.setText(user.getLocation());
+        if (userProfile.getLocation() != null)
+            mLocationView.setText(userProfile.getLocation());
         else {
             mLocationView.setVisibility(View.GONE);
         }
 
-        if (user.getUrl() != null)
-            mUrlView.setText(user.getUrl());
+        if (userProfile.getUrl() != null)
+            mUrlView.setText(userProfile.getUrl());
 
-       /* mFollowersView.setText(Utilis.format(user.getFollowersCount()));
-        mFollowingView.setText(Utilis.format(user.getFriendsCount()));
-        mTweetsCountView.setText(Utilis.format(user.getStatusesCount()));*/
+       /* mFollowersView.setText(Utilis.format(userProfile.getFollowersCount()));
+        mFollowingView.setText(Utilis.format(userProfile.getFriendsCount()));
+        mTweetsCountView.setText(Utilis.format(userProfile.getStatusesCount()));*/
         //todo what image library should I use, think of the RecyclerView
         /*mProfileImageView;
         mBannerImageView;
         mUserNameView;
         mScreenNameView;
         mDescriptionView;*/
-       /* if (user.getLocation() != null)
-            mLocationView.setText(user.getLocation());
+       /* if (userProfile.getLocation() != null)
+            mLocationView.setText(userProfile.getLocation());
         else
            ;// mLocationView.setVisibility();*/
-        //   mUrlView.setText(user.getUrl());
-        // mVerifiedAccountView.setVisibility(user.isVerified() ? View.VISIBLE : View.GONE);
+        //   mUrlView.setText(userProfile.getUrl());
+        // mVerifiedAccountView.setVisibility(userProfile.isVerified() ? View.VISIBLE : View.GONE);
 
     }
 

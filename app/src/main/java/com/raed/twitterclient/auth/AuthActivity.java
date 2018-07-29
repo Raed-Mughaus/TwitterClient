@@ -48,7 +48,7 @@ public class AuthActivity extends AppCompatActivity {
         setContentView(mWebView);
 
         mViewModel = ViewModelProviders
-                .of(this, new AuthViewModelFactory(((MyApplication) getApplication()).getAppComponent()))
+                .of(this)
                 .get(AuthViewModel.class);
 
         Disposable disposable = mViewModel

@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
 
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -22,7 +21,6 @@ public class AuthInterceptor implements Interceptor {
 
     private AuthHeaderGenerator mAuthHeaderGenerator;
 
-    @Inject
     public AuthInterceptor(CurrentUser currentUser){
         currentUser
                 .getCurrentUser()

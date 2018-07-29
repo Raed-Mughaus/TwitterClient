@@ -3,17 +3,18 @@ package com.raed.twitterclient.auth;
 
 import android.arch.lifecycle.ViewModel;
 
+import com.raed.twitterclient.AppTokenAndSecret;
+import com.raed.twitterclient.retrofitservices.RetrofitServices;
 import com.raed.twitterclient.userdata.AuthorizedUser;
 import com.raed.twitterclient.userdata.CurrentUser;
-import com.raed.twitterclient.utilis.MyMap;
 import com.raed.twitterclient.userdata.Users;
 import com.raed.twitterclient.authheader.AuthHeaderGenerator;
 import com.raed.twitterclient.authheader.SignatureGenerator;
 import com.raed.twitterclient.retrofitservices.AuthService;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
 
 
 import io.reactivex.Single;
@@ -23,19 +24,16 @@ public class AuthViewModel extends ViewModel {
     private static final String TAG = "AuthViewModel";
 
     private AuthService mAuthService;
-    private Users mUsers;
     private String mConsumerKey;
     private String mConsumerSecret;
-    private CurrentUser mCurrentUser;
 
-    @Inject
-    public AuthViewModel(AuthService authService, Users users, CurrentUser currentUser, String consumerKey, String consumerSecret) {
+    public AuthViewModel() {
         super();
-        mAuthService = authService;
-        mUsers = users;
-        mConsumerKey = consumerKey;
-        mConsumerSecret = consumerSecret;
-        mCurrentUser = currentUser;
+        mAuthService = RetrofitServices.getInstance().getAuthService();
+
+        AppTokenAndSecret tokenAndSecret = new AppTokenAndSecret();
+        mConsumerKey = tokenAndSecret.getAppKey();
+        mConsumerSecret = tokenAndSecret.getAppSecret();
     }
 
     Single<AuthorizedUser> onUserRedirected(String oauthToken, String oauthVerifier){
@@ -43,8 +41,8 @@ public class AuthViewModel extends ViewModel {
         SignatureGenerator signatureGenerator = new SignatureGenerator(mConsumerSecret, null);
         AuthHeaderGenerator headerGenerator = new AuthHeaderGenerator(mConsumerKey, oauthToken, signatureGenerator);
 
-        Map<String, String> additionalParams = MyMap.<String, String>create()
-                .put("oauth_verifier", oauthVerifier);
+        Map<String, String> additionalParams = new HashMap<>();
+        additionalParams.put("oauth_verifier", oauthVerifier);
 
         String authorizationHeader =
                 headerGenerator.generateAuthHeader("POST", "https://api.twitter.com/oauth/access_token", null, additionalParams);
@@ -80,7 +78,7 @@ public class AuthViewModel extends ViewModel {
     }
 
     void onNewUser(AuthorizedUser authorizedUser){
-        mUsers.addUser(authorizedUser);
-        mCurrentUser.setCurrentUser(authorizedUser);
+        Users.getInstance().addUser(authorizedUser);
+        CurrentUser.getInstance().setCurrentUser(authorizedUser);
     }
 }
