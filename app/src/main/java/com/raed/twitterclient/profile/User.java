@@ -2,7 +2,7 @@ package com.raed.twitterclient.profile;
 
 import com.google.gson.annotations.SerializedName;
 
-public class UserProfile {
+public class User {
 
     @SerializedName("id_str")
     private String id;

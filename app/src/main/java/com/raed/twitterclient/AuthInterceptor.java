@@ -68,7 +68,10 @@ public class AuthInterceptor implements Interceptor {
 
     private static String getBaseUrl(Request request){
         String urlString = request.url().toString();
-        return urlString.substring(0, urlString.indexOf("?"));
+        int index = urlString.indexOf("?");
+        if (index == -1)
+            return urlString;
+        return urlString.substring(0, index);
     }
 
     private static String getBodyAsString(Request request){

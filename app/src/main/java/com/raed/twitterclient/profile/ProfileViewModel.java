@@ -22,7 +22,7 @@ public class ProfileViewModel extends ViewModel {
         mUserService = RetrofitServices.getInstance().getUserService();
     }
 
-    public Observable<UserProfile> getUser() {
+    public Observable<User> getUser() {
         return mUserService.show(mUser.getValue().getUserId());
     }
 

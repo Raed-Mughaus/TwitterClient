@@ -1,18 +1,20 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
+    </style>
 
+    <style name="AppTheme.ProfileActivityTheme" parent="AppTheme">
         <!-- These 2 attributes allow us to draw on the status bar -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@color/transparent</item>
-
     </style>
 
     <color name="black">#ff000000</color>
+    <string name="home">Home</string>
 </resources>

@@ -2,6 +2,9 @@ package com.raed.twitterclient.retrofitservices;
 
 import android.util.Log;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.raed.twitterclient.AuthInterceptor;
 import com.raed.twitterclient.BuildConfig;
 import com.raed.twitterclient.userdata.CurrentUser;
@@ -38,6 +41,9 @@ public class RetrofitServices {
     }
 
     public RetrofitServices() {
+        Gson gson = new GsonBuilder()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .create();
         CurrentUser currentUser = CurrentUser.getInstance();
         AuthInterceptor authInterceptor = new AuthInterceptor(currentUser);
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder()
@@ -48,13 +54,17 @@ public class RetrofitServices {
         mRetrofit = new Retrofit.Builder()
                 .baseUrl("https://api.twitter.com/1.1/")
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler))
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(okHttpClientBuilder.build())
                 .build();
     }
 
     public UserService getUserService(){
         return mRetrofit.create(UserService.class);
+    }
+
+    public TLService getTLService(){
+        return mRetrofit.create(TLService.class);
     }
 
     public AuthService getAuthService(){

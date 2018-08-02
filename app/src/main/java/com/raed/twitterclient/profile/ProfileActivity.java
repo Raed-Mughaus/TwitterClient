@@ -133,20 +133,20 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     //todo have a look at Glide page to see how to use it with RecyclerView
-    private void updateUI(UserProfile userProfile){
+    private void updateUI(User user){
         Glide.with(Objects.requireNonNull(this))
-                .load(userProfile.getBannerImage())
+                .load(user.getBannerImage())
                 .into(mBannerImageView);
 
         Glide.with(Objects.requireNonNull(this))
-                .load(userProfile.getProfileImage().replace("_normal", ""))
+                .load(user.getProfileImage().replace("_normal", ""))
                 .into(mProfileImageView);
 
-        mNameView.setText(userProfile.getName());
-        mScreenNameView.setText(getString(R.string.username_prefix, userProfile.getScreenName()));
+        mNameView.setText(user.getName());
+        mScreenNameView.setText(getString(R.string.username_prefix, user.getScreenName()));
 
-        if (userProfile.getDescription() != null) {
-            mDescriptionView.setText(userProfile.getDescription());
+        if (user.getDescription() != null) {
+            mDescriptionView.setText(user.getDescription());
             HashTagHelper hashTagHelper = HashTagHelper
                     .Creator.create(0xff2187bb,
                             hashTag -> Toast.makeText(ProfileActivity.this, hashTag,
@@ -154,30 +154,30 @@ public class ProfileActivity extends AppCompatActivity {
             hashTagHelper.handle(mDescriptionView);
         }
 
-        if (userProfile.getLocation() != null)
-            mLocationView.setText(userProfile.getLocation());
+        if (user.getLocation() != null)
+            mLocationView.setText(user.getLocation());
         else {
             mLocationView.setVisibility(View.GONE);
         }
 
-        if (userProfile.getUrl() != null)
-            mUrlView.setText(userProfile.getUrl());
+        if (user.getUrl() != null)
+            mUrlView.setText(user.getUrl());
 
-       /* mFollowersView.setText(Utilis.format(userProfile.getFollowersCount()));
-        mFollowingView.setText(Utilis.format(userProfile.getFriendsCount()));
-        mTweetsCountView.setText(Utilis.format(userProfile.getStatusesCount()));*/
+       /* mFollowersView.setText(Utilis.format(user.getFollowersCount()));
+        mFollowingView.setText(Utilis.format(user.getFriendsCount()));
+        mTweetsCountView.setText(Utilis.format(user.getStatusesCount()));*/
         //todo what image library should I use, think of the RecyclerView
         /*mProfileImageView;
         mBannerImageView;
         mUserNameView;
         mScreenNameView;
         mDescriptionView;*/
-       /* if (userProfile.getLocation() != null)
-            mLocationView.setText(userProfile.getLocation());
+       /* if (user.getLocation() != null)
+            mLocationView.setText(user.getLocation());
         else
            ;// mLocationView.setVisibility();*/
-        //   mUrlView.setText(userProfile.getUrl());
-        // mVerifiedAccountView.setVisibility(userProfile.isVerified() ? View.VISIBLE : View.GONE);
+        //   mUrlView.setText(user.getUrl());
+        // mVerifiedAccountView.setVisibility(user.isVerified() ? View.VISIBLE : View.GONE);
 
     }
 

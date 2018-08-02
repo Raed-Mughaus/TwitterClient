@@ -1,7 +1,5 @@
 package com.raed.twitterclient;
 
-import android.util.Log;
-
 public class AppTokenAndSecret {
 
     static {
