@@ -1,10 +1,9 @@
 package com.raed.twitterclient.retrofitservices;
 
-import com.raed.twitterclient.Tweet;
+import com.raed.twitterclient.data.Tweet;
 
 import java.util.List;
 
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import retrofit2.http.GET;
 import retrofit2.http.Query;

@@ -1,6 +1,7 @@
 package com.raed.twitterclient.utilis;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -11,11 +12,14 @@ import android.graphics.RectF;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.raed.twitterclient.R;
+
+import java.time.Duration;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-public class Utilis {
+public class Utils {
 
     private static final NavigableMap<Long, String> suffixes = new TreeMap<Long, String>(){
         {
@@ -28,6 +32,30 @@ public class Utilis {
         }
     };
 
+    //todo continue testing this method in intellij
+    public static String getHappenXTimeAgoString(Resources resources, long happenAt){
+        long now = System.currentTimeMillis();
+        long since = now - happenAt;
+        long sinceInSeconds = since/1000;
+
+        long years = (sinceInSeconds / (60 * 60 * 24 * 365));
+        if (years != 0) return resources.getQuantityString(R.plurals.years, ((int) years), years);
+
+        long months = (sinceInSeconds / (60 * 60 * 24 * 31)) % 12;
+        if (months != 0) return resources.getQuantityString(R.plurals.months, ((int) months), months);
+
+        long days = (sinceInSeconds / (60 * 60 * 24) ) % 31;
+        if (days != 0) return resources.getQuantityString(R.plurals.days, ((int) days), days);
+
+        long hours = (sinceInSeconds / (60*60) ) % 24;
+        if (hours != 0) return resources.getQuantityString(R.plurals.hours, ((int) hours), hours);
+
+        long minutes = (sinceInSeconds / 60) % 60;
+        if (minutes != 0) return resources.getQuantityString(R.plurals.minutes, ((int) minutes), minutes);
+
+        long seconds = sinceInSeconds % 60 ;
+        return resources.getQuantityString(R.plurals.seconds, ((int) seconds), seconds);
+    }
 
     //copied from stack overflow
     public static String format(long value) {

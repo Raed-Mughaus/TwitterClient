@@ -10,10 +10,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.raed.twitterclient.MyApplication;
 import com.raed.twitterclient.utilis.Crashlytics;
 import com.raed.twitterclient.R;
-import com.raed.twitterclient.utilis.Utilis;
+import com.raed.twitterclient.utilis.Utils;
 
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -38,7 +37,7 @@ public class AuthActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!Utilis.isOnline(this)){
+        if (!Utils.isOnline(this)){
             Toast.makeText(this, R.string.no_internet_connection, Toast.LENGTH_LONG).show();
             finish();
             return;
@@ -69,7 +68,7 @@ public class AuthActivity extends AppCompatActivity {
     }
 
     private void handleAuthError(Throwable throwable){
-        if (Utilis.isOnline(AuthActivity.this)) {
+        if (Utils.isOnline(AuthActivity.this)) {
             Crashlytics.logException(new Exception(throwable));
             Toast.makeText(AuthActivity.this, R.string.error_happened_in_authentication, Toast.LENGTH_LONG).show();
         } else

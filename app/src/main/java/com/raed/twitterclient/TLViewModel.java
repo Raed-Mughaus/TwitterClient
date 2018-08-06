@@ -2,6 +2,7 @@ package com.raed.twitterclient;
 
 import android.arch.lifecycle.ViewModel;
 
+import com.raed.twitterclient.data.Tweet;
 import com.raed.twitterclient.retrofitservices.RetrofitServices;
 import com.raed.twitterclient.retrofitservices.TLService;
 

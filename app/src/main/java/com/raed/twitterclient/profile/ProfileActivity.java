@@ -163,9 +163,9 @@ public class ProfileActivity extends AppCompatActivity {
         if (user.getUrl() != null)
             mUrlView.setText(user.getUrl());
 
-       /* mFollowersView.setText(Utilis.format(user.getFollowersCount()));
-        mFollowingView.setText(Utilis.format(user.getFriendsCount()));
-        mTweetsCountView.setText(Utilis.format(user.getStatusesCount()));*/
+       /* mFollowersView.setText(Utils.format(user.getFollowersCount()));
+        mFollowingView.setText(Utils.format(user.getFriendsCount()));
+        mTweetsCountView.setText(Utils.format(user.getStatusesCount()));*/
         //todo what image library should I use, think of the RecyclerView
         /*mProfileImageView;
         mBannerImageView;
