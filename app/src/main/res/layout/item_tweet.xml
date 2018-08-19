@@ -105,24 +105,28 @@
 
     <TextView
         android:id="@+id/name_text_view"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:textStyle="bold"
         android:textSize="16sp"
+        android:textAlignment="viewStart"
         app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintStart_toEndOf="@id/user_profile_image"
         app:layout_constraintTop_toBottomOf="@id/barrier_b"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/screen_name_text_view"
         tools:text="Raed Mughaus"
         />
 
     <TextView
         android:id="@+id/screen_name_text_view"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:textSize="14sp"
+        android:textAlignment="viewStart"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/user_profile_image"
         app:layout_constraintTop_toBottomOf="@id/name_text_view"
         app:layout_constraintBottom_toTopOf="@id/barrier_a"

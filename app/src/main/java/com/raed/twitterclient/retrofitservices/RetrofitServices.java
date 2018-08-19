@@ -21,6 +21,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import okio.Buffer;
 import okio.BufferedSource;
+import retrofit2.CallAdapter;
+import retrofit2.HttpException;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -29,26 +31,22 @@ public class RetrofitServices {
 
     private static final String TAG = "RetrofitServices";
 
-    private static RetrofitServices sRetrofitServices;
+    private static RetrofitServices sRetrofitServices = new RetrofitServices();;
     private Retrofit mRetrofit;
 
     public static RetrofitServices getInstance() {
         return sRetrofitServices;
     }
 
-    public static void initializeInstance() {
-        sRetrofitServices = new RetrofitServices();
-    }
-
     public RetrofitServices() {
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .setDateFormat("EEE MMM dd HH:mm:ss Z yyyy")
                 .create();
-        CurrentUser currentUser = CurrentUser.getInstance();
-        AuthInterceptor authInterceptor = new AuthInterceptor(currentUser);
+        AuthInterceptor authInterceptor = new AuthInterceptor();
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder()
                 .addInterceptor(authInterceptor);
-        if (!BuildConfig.DEBUG)
+        if (BuildConfig.DEBUG)
             okHttpClientBuilder.addInterceptor(new MyLogInterceptor());
         Scheduler scheduler = Schedulers.from(Executors.newFixedThreadPool(10));//todo should I stick with .io() instead
         mRetrofit = new Retrofit.Builder()
@@ -68,8 +66,8 @@ public class RetrofitServices {
     }
 
     public AuthService getAuthService(){
-        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
-        if (!BuildConfig.DEBUG)
+        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder().addInterceptor(new MyLogInterceptor());
+        if (BuildConfig.DEBUG)
             okHttpClientBuilder.addInterceptor(new MyLogInterceptor());
         return new Retrofit.Builder()
                 .baseUrl("https://api.twitter.com")

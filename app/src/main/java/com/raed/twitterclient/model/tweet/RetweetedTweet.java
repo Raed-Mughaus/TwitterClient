@@ -1,21 +1,27 @@
-package com.raed.twitterclient.data;
+package com.raed.twitterclient.model.tweet;
+
 
 import com.google.gson.annotations.SerializedName;
-import com.raed.twitterclient.profile.User;
+import com.raed.twitterclient.model.User;
 
-public class Tweet {
+import java.util.Date;
+
+public class RetweetedTweet {
+
+    @SerializedName("created_at")
+    private Date time;
+
+    private long id;
 
     private String fullText;
     private int[] displayTextRange;
+    private Entities entities;
+    private long inReplyToStatusId;
+    private long inReplyToUserId;
+
     private User user;
 
-    @SerializedName("created_at")
-    private String time;
-
     private ExtendedEntities extendedEntities;
-
-    @SerializedName("retweeted_status")
-    private Tweet retweetedTweet;
 
     public String getText() {
         return fullText.substring(displayTextRange[0], displayTextRange[1]);
@@ -25,15 +31,16 @@ public class Tweet {
         return user;
     }
 
-    public Tweet getRetweetedTweet() {
-        return retweetedTweet;
-    }
-
     public ExtendedEntities getExtendedEntities() {
         return extendedEntities;
     }
 
-    public String getTime() {
+    public Date getTime() {
         return time;
     }
+
+    public long getId() {
+        return id;
+    }
+
 }

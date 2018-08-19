@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -15,9 +16,12 @@ import com.raed.twitterclient.R;
 import com.raed.twitterclient.utilis.Utils;
 
 
+import java.io.IOException;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import retrofit2.HttpException;
 
 
 public class AuthActivity extends AppCompatActivity {
@@ -67,8 +71,18 @@ public class AuthActivity extends AppCompatActivity {
         mCompositeDisposable.clear();
     }
 
+    //todo handle time error and other error types, you need to know the code in the response
+
     private void handleAuthError(Throwable throwable){
         if (Utils.isOnline(AuthActivity.this)) {
+            if (throwable instanceof HttpException){
+                HttpException exception = (HttpException) throwable;
+                try {
+                    Log.d(TAG, "handleAuthError: " + exception.response().errorBody().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             Crashlytics.logException(new Exception(throwable));
             Toast.makeText(AuthActivity.this, R.string.error_happened_in_authentication, Toast.LENGTH_LONG).show();
         } else

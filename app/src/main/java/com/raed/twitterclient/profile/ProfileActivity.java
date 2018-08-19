@@ -13,7 +13,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -25,7 +24,11 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.raed.twitterclient.R;
+import com.raed.twitterclient.model.User;
 import com.raed.twitterclient.hashtaghelper.HashTagHelper;
+import com.raed.twitterclient.retrofitservices.UserService;
+import com.raed.twitterclient.timeline.TLFragment;
+import com.raed.twitterclient.userlist.UsersListFragment;
 
 import java.util.Objects;
 
@@ -40,7 +43,6 @@ public class ProfileActivity extends AppCompatActivity {
 
     private ProfileViewModel mViewModel;
 
-    private RecyclerView mRecyclerView;
     private TextView mFollowersView;
     private TextView mFollowingView;
     private TextView mTweetsCountView;
@@ -100,7 +102,15 @@ public class ProfileActivity extends AppCompatActivity {
         viewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
-                return new ListFragment();
+                switch (position){
+                    case 0:
+                        return TLFragment.newInstance();
+                    case 1:
+                        return UsersListFragment.newInstance(getIntent().getStringExtra(KEY_USER_ID), UserService.UserRelation.FOLLOWING);
+                    case 2:
+                        return UsersListFragment.newInstance(getIntent().getStringExtra(KEY_USER_ID), UserService.UserRelation.FOLLOWERS);
+                }
+                throw new IllegalArgumentException("Position is out of range");
             }
 
             @Override
@@ -110,13 +120,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         });
 
-        TabLayout tabLayout = findViewById(R.id.tab_layout);
-        tabLayout.setupWithViewPager(viewPager, true);
-        setupTap(tabLayout.getTabAt(0), R.string.tweets, 500);
-        setupTap(tabLayout.getTabAt(1), R.string.following, 500);
-        setupTap(tabLayout.getTabAt(2), R.string.followers, 500);
-
-        mDisposable = mViewModel.getUser()
+        mDisposable = mViewModel.getUser(getIntent().getStringExtra(KEY_USER_ID))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         this::updateUI,
@@ -125,7 +129,18 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
-    private void setupTap(TabLayout.Tab tab, @StringRes int title, int number){
+    private void setupTapLayout(User user){
+
+        ViewPager viewPager = findViewById(R.id.view_pager);
+
+        TabLayout tabLayout = findViewById(R.id.tab_layout);
+        tabLayout.setupWithViewPager(viewPager, true);
+        setupTap(tabLayout.getTabAt(0), R.string.tweets, user.getStatusesCount());
+        setupTap(tabLayout.getTabAt(1), R.string.following, user.getFriendsCount());
+        setupTap(tabLayout.getTabAt(2), R.string.followers, user.getFollowersCount());
+    }
+
+    private void setupTap(TabLayout.Tab tab, @StringRes int title, long number){
         tab.setCustomView(R.layout.tab_profile);
         View view = tab.getCustomView();
         ((TextView) view.findViewById(R.id.number_view)).setText("" + number);
@@ -134,6 +149,9 @@ public class ProfileActivity extends AppCompatActivity {
 
     //todo have a look at Glide page to see how to use it with RecyclerView
     private void updateUI(User user){
+
+        setupTapLayout(user);
+
         Glide.with(Objects.requireNonNull(this))
                 .load(user.getBannerImage())
                 .into(mBannerImageView);

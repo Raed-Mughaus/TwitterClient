@@ -8,13 +8,19 @@ import com.raed.twitterclient.userdata.Users;
 
 public class MyApplication extends Application {
 
+    private static MyApplication sMyApplication;
+
+    public static MyApplication getApp() {
+        return sMyApplication;
+    }
+
     @Override
     public void onCreate() {
+        sMyApplication = this;
         super.onCreate();
-        Users.initializeInstance(this);
-        CurrentUser.initializeInstance(this);
-        RetrofitServices.initializeInstance();
     }
+
+
 
 }
 

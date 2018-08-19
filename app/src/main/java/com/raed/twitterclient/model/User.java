@@ -1,8 +1,14 @@
-package com.raed.twitterclient.profile;
+package com.raed.twitterclient.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 public class User {
+
+    //todo remember that you cannot see the protected user followers
+    //todo geoEnabled when posting tweet
+    //todo when your app is stable remove the data that you do not need
 
     @SerializedName("id_str")
     private String id;
@@ -12,24 +18,23 @@ public class User {
     private String location;
     private String description;
     private String url;
+    private UserEntities entities;
     @SerializedName("protected")
     private boolean mProtected;
     private long followersCount;
     private long  friendsCount;
     private long listedCount;
+    private Date createdAt;
     private long favouritesCount;
+    private boolean geoEnabled;
     private boolean verified;
     private long statusesCount;
-    @SerializedName("profile_image_url")
+    @SerializedName("profile_image_url_https")
     private String profileImage;
     @SerializedName("profile_banner_url")
     private String bannerImage;
     private boolean suspended;
     private boolean followRequestSent;
-    private String geoEnabled;
-
-    //private Status status;
-
 
     public String getId() {
         return id;
@@ -167,12 +172,60 @@ public class User {
         this.followRequestSent = followRequestSent;
     }
 
-    public String getGeoEnabled() {
+    public UserEntities getEntities() {
+        return entities;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public boolean isGeoEnabled() {
         return geoEnabled;
     }
 
-    public void setGeoEnabled(String geoEnabled) {
-        this.geoEnabled = geoEnabled;
+    public static class UserEntities{
+        private EntitiesUrl url;
+        private Description description;
+
+        public UserEntities(EntitiesUrl url, Description description) {
+            this.url = url;
+            this.description = description;
+        }
+
+        public Description getDescription() {
+            return description;
+        }
+
+        public EntitiesUrl getUrl() {
+            return url;
+        }
+
+        public static class Description{
+
+            private Url[] urls;
+
+            public Description(Url[] urls) {
+                this.urls = urls;
+            }
+
+            public Url[] getUrls() {
+                return urls;
+            }
+        }
+
+        public static class EntitiesUrl{
+
+            private Url[] urls;
+
+            public EntitiesUrl(Url[] urls) {
+                this.urls = urls;
+            }
+
+            public Url[] getUrls() {
+                return urls;
+            }
+        }
     }
 }
 

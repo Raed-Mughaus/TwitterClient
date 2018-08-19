@@ -6,7 +6,8 @@ import android.support.annotation.MainThread;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.raed.twitterclient.utilis.StringFile;
+import com.raed.twitterclient.MyApplication;
+import com.raed.twitterclient.io.StringFile;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -22,11 +23,10 @@ public class Users {
     private final StringFile mUsersFile;
 
     public static Users getInstance(){
+        if (sUsers == null){
+            sUsers = new Users(MyApplication.getApp());
+        }
         return sUsers;
-    }
-
-    public static void initializeInstance(Context context){
-        sUsers = new Users(context);
     }
 
     private Users(Context context) {

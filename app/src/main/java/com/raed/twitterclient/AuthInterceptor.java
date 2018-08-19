@@ -21,10 +21,11 @@ public class AuthInterceptor implements Interceptor {
 
     private AuthHeaderGenerator mAuthHeaderGenerator;
 
-    public AuthInterceptor(CurrentUser currentUser){
-        currentUser
-                .getCurrentUser()
-                .observeForever(this::updateHeaderGenerator);
+    public AuthInterceptor(){
+        AuthorizedUser user = CurrentUser.getInstance().getCurrentUser();
+        AppTokenAndSecret appTokenAndSecret = new AppTokenAndSecret();
+        SignatureGenerator signatureGenerator = new SignatureGenerator(appTokenAndSecret.getAppSecret(), user.getSecret());
+        mAuthHeaderGenerator = new AuthHeaderGenerator(appTokenAndSecret.getAppKey(), user.getToken(), signatureGenerator);
     }
 
     @Override
@@ -45,11 +46,6 @@ public class AuthInterceptor implements Interceptor {
         return chain.proceed(requestWithAuthHeader);
     }
 
-    private void updateHeaderGenerator(AuthorizedUser user){
-        AppTokenAndSecret appTokenAndSecret = new AppTokenAndSecret();
-        SignatureGenerator signatureGenerator = new SignatureGenerator(appTokenAndSecret.getAppSecret(), user.getSecret());
-        mAuthHeaderGenerator = new AuthHeaderGenerator(appTokenAndSecret.getAppKey(), user.getToken(), signatureGenerator);
-    }
 
     private static Map<String, String> generateMap(Request request){
         Map<String, String> map = new HashMap<>();
