@@ -1,6 +1,5 @@
 package com.raed.twitterclient.io;
 
-
 import com.raed.twitterclient.utilis.Crashlytics;
 
 import java.io.File;
@@ -8,28 +7,17 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-/**
- * A wrapper about a File that allows you to:
- * 1-Write string to the file.
- * 2-Read a string from the file.
- */
-public class StringFile {
-
-    private File mFile;
-
-    public StringFile(File file) {
-        mFile = file;
-    }
+public class IOUtils {
 
     /**
      * @return null if the file does not exist
      */
-    public String read(){
+    public static String readString(File file){
         try {
-            if (!mFile.exists())
+            if (!file.exists())
                 return null;
-            FileInputStream inputStream = new FileInputStream(mFile);
-            byte[] bytes = new byte[(int) mFile.length()];
+            FileInputStream inputStream = new FileInputStream(file);
+            byte[] bytes = new byte[(int) file.length()];
             inputStream.read(bytes);
             inputStream.close();
             return new String(bytes);
@@ -39,15 +27,16 @@ public class StringFile {
         return null;
     }
 
-    public void write(String string){
+    public static void writeString(File file, String string){
         try {
-            if (!mFile.exists())
-                mFile.createNewFile();
-            FileOutputStream outputStream = new FileOutputStream(mFile);
+            if (!file.exists())
+                file.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(file);
             outputStream.write(string.getBytes());
             outputStream.close();
         }catch (IOException e) {
             Crashlytics.logException(e);
         }
     }
+
 }

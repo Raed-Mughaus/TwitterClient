@@ -105,6 +105,7 @@ public class AuthActivity extends AppCompatActivity {
                                 user -> {
                                     mViewModel.onNewUser(user);
                                     finish();
+                                    //todo Do I need to restart the app here?
                                 },
                                 AuthActivity.this::handleAuthError
                         );

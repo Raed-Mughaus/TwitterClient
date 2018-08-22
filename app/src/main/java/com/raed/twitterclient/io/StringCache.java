@@ -31,7 +31,7 @@ public class StringCache {
 
     public void addString(long id, String string){
         File file = new File(mCacheFolder, id + "");
-        new StringFile(file).write(string);
+        IOUtils.writeString(file, string);
     }
 
     /**
@@ -46,7 +46,7 @@ public class StringCache {
         if (nearestID == null)
             return null;
         File file = new File(mCacheFolder, nearestID + "");
-        return new StringFile(file).read();
+        return IOUtils.readString(file);
     }
 
     /**
@@ -61,7 +61,7 @@ public class StringCache {
         if (nearestID == null)
             return null;
         File file = new File(mCacheFolder, nearestID + "");
-        return new StringFile(file).read();
+        return IOUtils.readString(file);
     }
 
     public void clearCache(){

@@ -1,9 +1,8 @@
-package com.raed.twitterclient;
+package com.raed.twitterclient.x;
 
 import com.raed.twitterclient.authheader.AuthHeaderGenerator;
 import com.raed.twitterclient.authheader.SignatureGenerator;
-import com.raed.twitterclient.userdata.AuthorizedUser;
-import com.raed.twitterclient.userdata.CurrentUser;
+import com.raed.twitterclient.authusers.AuthUser;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -21,15 +20,14 @@ public class AuthInterceptor implements Interceptor {
 
     private AuthHeaderGenerator mAuthHeaderGenerator;
 
-    public AuthInterceptor(){
-        AuthorizedUser user = CurrentUser.getInstance().getCurrentUser();
+    public AuthInterceptor(AuthUser user){
         AppTokenAndSecret appTokenAndSecret = new AppTokenAndSecret();
         SignatureGenerator signatureGenerator = new SignatureGenerator(appTokenAndSecret.getAppSecret(), user.getSecret());
         mAuthHeaderGenerator = new AuthHeaderGenerator(appTokenAndSecret.getAppKey(), user.getToken(), signatureGenerator);
     }
 
     @Override
-    public Response intercept(Chain chain) throws IOException {
+    public Response intercept(Chain chain) throws IOException, RuntimeException {
         Request request = chain.request();
 
         String authHeader = mAuthHeaderGenerator

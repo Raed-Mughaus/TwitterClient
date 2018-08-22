@@ -3,7 +3,9 @@ package com.raed.twitterclient.model.tweet;
 import com.google.gson.annotations.SerializedName;
 import com.raed.twitterclient.model.User;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 
 //todo what about an index for fast retrival
 public class Tweet {
@@ -67,5 +69,13 @@ public class Tweet {
 
     public long getId() {
         return id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tweet tweet = (Tweet) o;
+        return id == tweet.id;
     }
 }

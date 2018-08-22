@@ -38,6 +38,11 @@ class TweetAdapter extends PagedListAdapter<Tweet, TweetViewHolder> {
         return super.getItem(position);
     }
 
+    @Override
+    public long getItemId(int position) {
+        return getItem(position).getId();
+    }
+
     private static class MyDiffCallback extends DiffUtil.ItemCallback<Tweet> {
         @Override
         public boolean areItemsTheSame(Tweet oldItem, Tweet newItem) {

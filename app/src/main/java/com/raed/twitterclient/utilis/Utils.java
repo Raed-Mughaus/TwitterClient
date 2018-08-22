@@ -14,10 +14,13 @@ import android.net.NetworkInfo;
 
 import com.raed.twitterclient.R;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+
+import retrofit2.HttpException;
 
 public class Utils {
 
@@ -78,6 +81,15 @@ public class Utils {
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
+    public static int getTwitterErrorCode(HttpException e){
+        //todo implemnt  //todo you must use json parser or GSON
+        return 0;
+        /*
+        String responseStr  = null;
+        try { responseStr = e.response().errorBody().string(); } catch (IOException ignored) { }
+       */
     }
 
 

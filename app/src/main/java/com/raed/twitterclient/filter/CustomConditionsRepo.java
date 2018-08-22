@@ -6,7 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.raed.twitterclient.MyApplication;
-import com.raed.twitterclient.io.StringFile;
+import com.raed.twitterclient.io.IOUtils;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -26,7 +26,7 @@ public class CustomConditionsRepo {
     private static CustomConditionsRepo sCustomConditionsRepo;
 
     private List<Condition> mConditions;
-    private StringFile mStringFile;
+    private File mFile;
 
     public static CustomConditionsRepo getInstance(){
         if (sCustomConditionsRepo == null)
@@ -35,8 +35,7 @@ public class CustomConditionsRepo {
     }
 
     private CustomConditionsRepo(Application app) {
-        File file = new File(app.getFilesDir(), CONDITIONS_FILE_NAME);
-        mStringFile = new StringFile(file);
+        mFile = new File(app.getFilesDir(), CONDITIONS_FILE_NAME);
 
         retrieveConditions();
     }
@@ -54,13 +53,13 @@ public class CustomConditionsRepo {
         Gson gson = new GsonBuilder().create();
         Type userListType = new TypeToken<ArrayList<Condition>>(){}.getType();
         String filterString = gson.toJson(mConditions, userListType);
-        mStringFile.write(filterString);
+        IOUtils.writeString(mFile, filterString);
     }
 
     private void retrieveConditions(){
         Gson gson = new GsonBuilder().create();
         Type userListType = new TypeToken<ArrayList<Condition>>(){}.getType();
-        mConditions = gson.fromJson(mStringFile.read(), userListType);
+        mConditions = gson.fromJson(IOUtils.readString(mFile), userListType);//todo what if the file does not exists
     }
 
 }

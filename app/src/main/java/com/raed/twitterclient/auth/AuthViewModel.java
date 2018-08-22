@@ -3,11 +3,10 @@ package com.raed.twitterclient.auth;
 
 import android.arch.lifecycle.ViewModel;
 
-import com.raed.twitterclient.AppTokenAndSecret;
+import com.raed.twitterclient.x.AppTokenAndSecret;
+import com.raed.twitterclient.authusers.AuthUser;
 import com.raed.twitterclient.retrofitservices.RetrofitServices;
-import com.raed.twitterclient.userdata.AuthorizedUser;
-import com.raed.twitterclient.userdata.CurrentUser;
-import com.raed.twitterclient.userdata.Users;
+import com.raed.twitterclient.authusers.AuthUsersRepository;
 import com.raed.twitterclient.authheader.AuthHeaderGenerator;
 import com.raed.twitterclient.authheader.SignatureGenerator;
 import com.raed.twitterclient.retrofitservices.AuthService;
@@ -36,7 +35,7 @@ public class AuthViewModel extends ViewModel {
         mConsumerSecret = tokenAndSecret.getAppSecret();
     }
 
-    Single<AuthorizedUser> onUserRedirected(String oauthToken, String oauthVerifier){
+    Single<AuthUser> onUserRedirected(String oauthToken, String oauthVerifier){
 
         SignatureGenerator signatureGenerator = new SignatureGenerator(mConsumerSecret, null);
         AuthHeaderGenerator headerGenerator = new AuthHeaderGenerator(mConsumerKey, oauthToken, signatureGenerator);
@@ -51,14 +50,14 @@ public class AuthViewModel extends ViewModel {
                 .accessToken(authorizationHeader, oauthVerifier)
                 .map(responseBody -> {
                     String[] params = responseBody.string().split("&");
-                    AuthorizedUser authorizedUser = new AuthorizedUser();
+                    AuthUser authUser = new AuthUser();
                     for (String param : params){
-                        if (param.contains("oauth_token=")) authorizedUser.setToken(param.substring(param.indexOf('=') + 1));
-                        else if (param.contains("oauth_token_secret=")) authorizedUser.setSecret(param.substring(param.indexOf("=") + 1));
-                        else if (param.contains("user_id=")) authorizedUser.setUserId(param.substring(param.indexOf("=") + 1));
-                        else if (param.contains("screen_name=")) authorizedUser.setScreenName(param.substring(param.indexOf("=") + 1));
+                        if (param.contains("oauth_token=")) authUser.setToken(param.substring(param.indexOf('=') + 1));
+                        else if (param.contains("oauth_token_secret=")) authUser.setSecret(param.substring(param.indexOf("=") + 1));
+                        else if (param.contains("user_id=")) authUser.setUserId(param.substring(param.indexOf("=") + 1));
+                        else if (param.contains("screen_name=")) authUser.setScreenName(param.substring(param.indexOf("=") + 1));
                     }
-                    return authorizedUser;
+                    return authUser;
                 });
     }
 
@@ -77,8 +76,7 @@ public class AuthViewModel extends ViewModel {
                 });
     }
 
-    void onNewUser(AuthorizedUser authorizedUser){
-        Users.getInstance().addUser(authorizedUser);
-        CurrentUser.getInstance().setCurrentUser(authorizedUser);
+    void onNewUser(AuthUser authUser){
+        AuthUsersRepository.getInstance().addUser(authUser);
     }
 }

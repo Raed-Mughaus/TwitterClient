@@ -1,4 +1,4 @@
-package com.raed.twitterclient;
+package com.raed.twitterclient.x;
 
 public class AppTokenAndSecret {
 

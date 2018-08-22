@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group
+        android:id="@+id/group1"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/home"
+            android:title="@string/home"
+            />
+    </group>
+
+    <group
+        android:id="@+id/group2"
+        >
+        <item
+            android:id="@+id/night_mode"
+            android:title="@string/night_mode"
+            app:actionLayout="@layout/view_switch"
+            />
+
+        <item
+            android:id="@+id/settings"
+            android:title="@string/settings"
+            android:icon="@drawable/ic_settings_24"
+            />
+
+        <item
+            android:id="@+id/filters"
+            android:title="@string/filters"
+
+            />
+    </group>
+
+
+
+</menu>
