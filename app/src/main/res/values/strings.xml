@@ -9,6 +9,12 @@
     <string name="following">Following</string>
     <string name="followers">Followers</string>
     <string name="tweets">Tweets</string>
+
+    <plurals name="tweet_or_tweets">
+        <item quantity="one">%1$d tweet</item>
+        <item quantity="other">%1$d tweets</item>
+    </plurals>
+
     <plurals name="years">
         <item quantity="one">%1$d year</item>
         <item quantity="other">%1$d years</item>
@@ -39,4 +45,5 @@
     <string name="add_account">Add Account</string>
     <string name="settings">Settings</string>
     <string name="filters">Filters</string>
+    <string name="rate_limit_reached">Rate Limit Reached</string>
 </resources>

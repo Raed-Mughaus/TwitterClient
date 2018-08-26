@@ -1,7 +1,6 @@
 package com.raed.twitterclient;
 
 import android.arch.lifecycle.ViewModel;
-import android.util.Log;
 
 import com.raed.twitterclient.authusers.AuthUser;
 import com.raed.twitterclient.authusers.AuthUsersRepository;
@@ -47,5 +46,13 @@ public class NavigationViewModel extends ViewModel {
 
     public Single<List<User>> getAuthUsers() {
         return mAuthUsers;
+    }
+
+    public void setCurrentUser(User user) {
+        mRepository.setCurrentUser(user.getId());
+    }
+
+    public void removeUserAccount(User user) {
+        mRepository.removeUser(user.getId());
     }
 }

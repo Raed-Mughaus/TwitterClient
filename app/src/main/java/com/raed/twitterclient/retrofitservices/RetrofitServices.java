@@ -1,5 +1,6 @@
 package com.raed.twitterclient.retrofitservices;
 
+import android.arch.lifecycle.LiveData;
 import android.util.Log;
 
 import com.google.gson.FieldNamingPolicy;
@@ -38,27 +39,9 @@ public class RetrofitServices {
     }
 
     private RetrofitServices() {
-        Gson gson = new GsonBuilder()
-                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .setDateFormat("EEE MMM dd HH:mm:ss Z yyyy")
-                .create();
-        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
-
-        AuthUser user = AuthUsersRepository.getInstance().getCurrentUser();
-        if (user != null){
-            AuthInterceptor authInterceptor = new AuthInterceptor(user);
-            okHttpClientBuilder.addInterceptor(authInterceptor);
-        }
-
-        if (BuildConfig.DEBUG)
-            okHttpClientBuilder.addInterceptor(new MyLogInterceptor());
-        Scheduler scheduler = Schedulers.from(Executors.newFixedThreadPool(10));//todo should I stick with .io() instead
-        mRetrofit = new Retrofit.Builder()
-                .baseUrl("https://api.twitter.com/1.1/")
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler))
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(okHttpClientBuilder.build())
-                .build();
+        AuthUser authUser = AuthUsersRepository.getInstance().getCurrentUser();
+        if (authUser != null)
+            initializeRetrofit(authUser);
     }
 
     public UserService getUserService(){
@@ -79,6 +62,27 @@ public class RetrofitServices {
                 .client(okHttpClientBuilder.build())
                 .build()
                 .create(AuthService.class);
+    }
+
+    private void initializeRetrofit(AuthUser authUser){
+        Gson gson = new GsonBuilder()
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .setDateFormat("EEE MMM dd HH:mm:ss Z yyyy")
+                .create();
+        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
+
+        AuthInterceptor authInterceptor = new AuthInterceptor(authUser);
+        okHttpClientBuilder.addInterceptor(authInterceptor);
+
+        if (BuildConfig.DEBUG)
+            okHttpClientBuilder.addInterceptor(new MyLogInterceptor());
+        Scheduler scheduler = Schedulers.from(Executors.newFixedThreadPool(10));//todo should I stick with .io() instead
+        mRetrofit = new Retrofit.Builder()
+                .baseUrl("https://api.twitter.com/1.1/")
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler))
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .client(okHttpClientBuilder.build())
+                .build();
     }
 
     private static class MyLogInterceptor implements Interceptor{

@@ -1,21 +1,22 @@
 package com.raed.twitterclient.utilis;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.raed.twitterclient.MainActivity;
 import com.raed.twitterclient.R;
+import com.raed.twitterclient.TwitterErrors;
+import com.raed.twitterclient.TwitterErrors.TwitterError;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -83,15 +84,25 @@ public class Utils {
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
-    public static int getTwitterErrorCode(HttpException e){
-        //todo implemnt  //todo you must use json parser or GSON
-        return 0;
-        /*
+    public static TwitterError[] extractTwitterErrors(HttpException e){
         String responseStr  = null;
         try { responseStr = e.response().errorBody().string(); } catch (IOException ignored) { }
-       */
+        TypeToken typeToken = new TypeToken<TwitterErrors>(){};
+        return ((TwitterErrors) new Gson().fromJson(responseStr, typeToken.getType())).errors;
     }
 
+    public static void restartApp(Context context){
+        Intent activityIntent = new Intent(context, MainActivity.class);
+        int mPendingIntentId = 123456;
+        PendingIntent restartPendingIntent = PendingIntent.getActivity(context, mPendingIntentId,
+                activityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        AlarmManager mgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mgr.setExactAndAllowWhileIdle(AlarmManager.RTC, System.currentTimeMillis() + 100, restartPendingIntent);
+        }else
+            mgr.setExact(AlarmManager.RTC, System.currentTimeMillis() + 100, restartPendingIntent);
+        System.exit(0);
+    }
 
     /*public static Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
         Bitmap output = Bitmap
@@ -114,5 +125,4 @@ public class Utils {
 
         return output;
     }*/
-
 }

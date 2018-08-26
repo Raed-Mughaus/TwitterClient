@@ -13,9 +13,9 @@ public class TLPreferences {
 
     private SharedPreferences mSharedPreferences;
 
-    public TLPreferences() {
+    public TLPreferences(String userID) {
         mSharedPreferences = MyApplication.getApp()
-                .getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+                .getSharedPreferences(userID + SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
     }
 
     public void saveScrollPosition(long tweetID, int offset){

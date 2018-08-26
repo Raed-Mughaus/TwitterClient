@@ -20,12 +20,10 @@ import io.reactivex.Observable;
 //todo you need to test this file
 public class StringCache {
 
-    private final static String CACHE_FOLDER = "tweets";
-
     private File mCacheFolder;
 
-    public StringCache() {
-        mCacheFolder = new File(MyApplication.getApp().getCacheDir(), CACHE_FOLDER);
+    public StringCache(File cacheFolder) {
+        mCacheFolder = cacheFolder;
         mCacheFolder.mkdirs();//in case it is not created
     }
 
@@ -64,6 +62,17 @@ public class StringCache {
         return IOUtils.readString(file);
     }
 
+    public String getNewestString() {
+        Long maxID = Observable
+                .fromArray( getFileIds() )
+                .reduce((max, fileID) -> max > fileID ? max : fileID)
+                .blockingGet();
+        if (maxID == null)
+            return null;
+        File file = new File(mCacheFolder, maxID + "");
+        return IOUtils.readString(file);
+    }
+
     public void clearCache(){
         //todo consider moving file to be faster
         for (File file : mCacheFolder.listFiles())
@@ -89,29 +98,29 @@ public class StringCache {
     public static class Transaction{
 
         private StringCache mStringCache;
-        private List<CachePair> mPairs = new ArrayList<>();
+        private List<CacheString> mCacheStrings = new ArrayList<>();
 
-        public Transaction(StringCache StringCache) {
+        Transaction(StringCache StringCache) {
             mStringCache = StringCache;
         }
 
-        public void addTweets(long maxId, String tweets){
-            mPairs.add(new CachePair(maxId, tweets));
+        public void addString(long maxId, String tweets){
+            mCacheStrings.add(new CacheString(maxId, tweets));
         }
 
         public void commit(){
-            for (CachePair cachePair : mPairs)
-                mStringCache.addString(cachePair.id, cachePair.json);
+            for (CacheString cacheString : mCacheStrings)
+                mStringCache.addString(cacheString.id, cacheString.string);
         }
     }
 
-    private static class CachePair{
+    private static class CacheString {
         long id;
-        String json;
+        String string;
 
-        CachePair(long id, String json) {
+        CacheString(long id, String string) {
             this.id = id;
-            this.json = json;
+            this.string = string;
         }
     }
 }

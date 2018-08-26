@@ -4,11 +4,13 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.paging.DataSource;
 import android.arch.paging.PageKeyedDataSource;
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 
+import com.raed.twitterclient.authusers.AuthUser;
 import com.raed.twitterclient.model.tweet.Tweet;
 import com.raed.twitterclient.timeline.TLEvent;
-import com.raed.twitterclient.timeline.data.TweetsRepository.TweetsSubset;
+import com.raed.twitterclient.timeline.data.TweetsRepository.TweetList;
 import com.raed.twitterclient.utilis.Crashlytics;
 
 import java.io.IOException;
@@ -21,78 +23,185 @@ public class TLDataSource extends PageKeyedDataSource<Long, Tweet>{
 
     private static final String TAG = TLDataSource.class.getSimpleName();
 
-    private TweetsRepository mRepository = new TweetsRepository();
+    private TweetsRepository mRepository;
     private Long mInitialKey;//the tweet with this id needs to be included in the list of the 1st load
 
-    private MutableLiveData<TLEvent> mTLEvent;
+    private MutableLiveData<TLEvent> mInitialTweetsTLEvent;
+    private MutableLiveData<TLEvent> mNewTweetsTLEvent;
+    private MutableLiveData<TLEvent> mOldTweetsTLEvent;
     private MutableLiveData<Exception> mError;
 
-    private TLDataSource(Long initialKey, MutableLiveData<TLEvent> tlEvent, MutableLiveData<Exception> error) {
-        mInitialKey = initialKey;
-        mTLEvent = tlEvent;
-        mError = error;
-    }
+    private LoadInitialCallback<Long, Tweet> mInitialCallback;
+    private LoadInitialParams<Long> mInitialParams;
 
+    private LoadCallback<Long, Tweet> mBeforeCallback;
+    private LoadParams<Long> mBeforeParams;
+
+    private LoadCallback<Long, Tweet> mAfterCallback;
+    private LoadParams<Long> mAfterParams;
+
+    private TLDataSource(Long initialKey, AuthUser user,
+                         MutableLiveData<TLEvent> initialTweetsTLEvent,
+                         MutableLiveData<TLEvent> newTweetsTLEvent,
+                         MutableLiveData<TLEvent> oldTweetsTLEvent,
+                         MutableLiveData<Exception> error) {
+        mInitialKey = initialKey;
+        mInitialTweetsTLEvent = initialTweetsTLEvent;
+        mNewTweetsTLEvent = newTweetsTLEvent;
+        mOldTweetsTLEvent = oldTweetsTLEvent;
+        mError = error;
+        mRepository = new TweetsRepository(user);
+    }
+    //logic -> event -> errors
     @Override
     public void loadInitial(@NonNull LoadInitialParams<Long> params, @NonNull LoadInitialCallback<Long, Tweet> callback) {
         Log.d(TAG, "loadInitial:");
-        TweetsSubset tweetsSubset;
+        TweetList tweetList = null;
         try {
+            mInitialTweetsTLEvent.postValue(TLEvent.START_LOADING_TWEETS);
             if (mInitialKey == null) {
-                tweetsSubset = mRepository.getTweets();
+                tweetList = mRepository.getTweets();
             } else {
-                tweetsSubset = mRepository.getTweetsThatInclude(mInitialKey);
-                if (tweetsSubset == null){
-                    tweetsSubset = mRepository.getTweets();
-                }
+                tweetList = mRepository.getTweetsThatInclude(mInitialKey);
+                if (tweetList == null)
+                    tweetList = mRepository.getTweets();
             }
-            callback.onResult(tweetsSubset.tweets, tweetsSubset.newerTweetsKey, tweetsSubset.olderTweetsKey);
         }
         catch (IOException e) { Crashlytics.logException(e);}
-        catch (Exception e){ mError.postValue(e); }
+        catch (Exception e){
+            mInitialTweetsTLEvent.postValue(TLEvent.FAIL_TO_LOAD_TWEETS);
+            mError.postValue(e);
+            mInitialCallback = callback;
+            mInitialParams = params;
+            return;
+        }
+        if (tweetList == null){
+            mInitialTweetsTLEvent.postValue(TLEvent.NO_TWEETS_AVAILABLE_FOR_NOW);
+            mInitialCallback = callback;
+            mInitialParams = params;
+        } else {
+            mInitialTweetsTLEvent.postValue(TLEvent.TWEETS_LOADED_SUCCESSFULLY);
+            callback.onResult(tweetList.tweets, tweetList.newerTweetsKey, tweetList.olderTweetsKey);
+        }
     }
 
     @Override
     public void loadBefore(@NonNull LoadParams<Long> params, @NonNull LoadCallback<Long, Tweet> callback) {
         Log.d(TAG, "loadBefore: ");
-        TweetsSubset tweetsSubset = null;
-        try { tweetsSubset = mRepository.getTweetsNewerThan(params.key); }
+        TweetList tweetList = null;
+        try {
+            mNewTweetsTLEvent.postValue(TLEvent.START_LOADING_TWEETS);
+            tweetList = mRepository.getTweetsNewerThan(params.key);
+        }
         catch (IOException e) { Crashlytics.logException(e);}
-        catch (Exception e){ mError.postValue(e); }
-        if(tweetsSubset == null)
-            callback.onResult(new ArrayList<>(),null);
-        else
-            callback.onResult(tweetsSubset.tweets, tweetsSubset.newerTweetsKey);
+        catch (Exception e){
+            mBeforeParams = params;
+            mBeforeCallback = callback;
+            mNewTweetsTLEvent.postValue(TLEvent.FAIL_TO_LOAD_TWEETS);
+            mError.postValue(e);
+            return;
+        }
+        if(tweetList == null) {
+            mBeforeParams = params;
+            mBeforeCallback = callback;
+            mNewTweetsTLEvent.postValue(TLEvent.NO_TWEETS_AVAILABLE_FOR_NOW);
+        } else {
+            callback.onResult(tweetList.tweets, tweetList.newerTweetsKey);
+            mNewTweetsTLEvent.postValue(TLEvent.TWEETS_LOADED_SUCCESSFULLY);
+        }
     }
 
     @Override
     public void loadAfter(@NonNull LoadParams<Long> params, @NonNull LoadCallback<Long, Tweet> callback) {
         Log.d(TAG, "loadAfter: " + params.key);
-        TweetsSubset tweetsSubset = null;
-        try { tweetsSubset = mRepository.getTweetsOlderThan(params.key); }
-        catch (IOException e) { Crashlytics.logException(e);}
-        catch (Exception e){ mError.postValue(e); }
-        if(tweetsSubset == null)
+        TweetList tweetList = null;
+        try {
+            mOldTweetsTLEvent.postValue(TLEvent.START_LOADING_TWEETS);
+            tweetList = mRepository.getTweetsOlderThan(params.key);
+        } catch (IOException e) { Crashlytics.logException(e);}
+        catch (Exception e){
+            mAfterParams = params;
+            mAfterCallback = callback;
+            mOldTweetsTLEvent.postValue(TLEvent.FAIL_TO_LOAD_TWEETS);
+            mError.postValue(e);
+            return;
+        }
+        if(tweetList == null) {
             callback.onResult(new ArrayList<>(),null);
-        else
-            callback.onResult(tweetsSubset.tweets, tweetsSubset.olderTweetsKey);
+            mOldTweetsTLEvent.postValue(TLEvent.NO_MORE_TWEETS_AVAILABLE);
+        } else {
+            callback.onResult(tweetList.tweets, tweetList.olderTweetsKey);
+            mOldTweetsTLEvent.postValue(TLEvent.TWEETS_LOADED_SUCCESSFULLY);
+        }
+    }
+
+    @WorkerThread
+    public void retryToLoadInitialTweets(){
+        Log.d(TAG, "retryToLoadInitialTweets:");
+        if (mInitialCallback == null){
+            throw new IllegalStateException("Trying to load ");
+        }
+        LoadInitialCallback<Long, Tweet> loadCallback = mInitialCallback;
+        LoadInitialParams<Long> loadParams = mInitialParams;
+        mInitialCallback = null;
+        mInitialParams = null;
+        loadInitial(loadParams, loadCallback);
+    }
+
+    @WorkerThread
+    public void retryToLoadNewTweets(){
+        Log.d(TAG, "retryToLoadNewTweets: ");
+        if (mBeforeCallback == null){
+            throw new IllegalStateException("Trying to load ");
+        }
+        LoadCallback<Long, Tweet> loadCallback = mBeforeCallback;
+        LoadParams<Long> loadParams = mBeforeParams;
+        mBeforeCallback = null;
+        mBeforeParams = null;
+        loadBefore(loadParams, loadCallback);
+    }
+
+    @WorkerThread
+    public void retryToLoadOldTweets(){
+        Log.d(TAG, "retryToLoadOldTweets: ");
+        if (mAfterCallback == null){
+            throw new IllegalStateException("Trying to load ");
+        }
+        LoadCallback<Long, Tweet> loadCallback = mAfterCallback;
+        LoadParams<Long> loadParams = mAfterParams;
+        mAfterCallback = null;
+        mAfterParams = null;
+        loadAfter(loadParams, loadCallback);
     }
 
     public static class Factory extends DataSource.Factory<Long, Tweet>{
 
         private Long mInitialKey;
-        private MutableLiveData<TLEvent> mTLEvent;
-        private MutableLiveData<Exception> mError;
 
-        public Factory(Long initialKey, MutableLiveData<TLEvent> tlEvent, MutableLiveData<Exception> error) {
+        private MutableLiveData<TLEvent> mInitialTweetsTLEvent;
+        private MutableLiveData<TLEvent> mNewTweetsTLEvent;
+        private MutableLiveData<TLEvent> mOlderTweetsTLEvent;
+        private MutableLiveData<Exception> mError;
+        private AuthUser mAuthUser;
+
+        public Factory(Long initialKey, AuthUser authUser,
+                       MutableLiveData<TLEvent> initialTweetsTLEvent,
+                       MutableLiveData<TLEvent> newTweetsTLEvent,
+                       MutableLiveData<TLEvent> olderTweetsTLEvent,
+                       MutableLiveData<Exception> error) {
             mInitialKey = initialKey;
-            mTLEvent = tlEvent;
+            mAuthUser = authUser;
+            mInitialTweetsTLEvent = initialTweetsTLEvent;
+            mNewTweetsTLEvent = newTweetsTLEvent;
+            mOlderTweetsTLEvent = olderTweetsTLEvent;
             mError = error;
+
         }
 
         @Override
         public DataSource<Long, Tweet> create() {
-            return new TLDataSource(mInitialKey, mTLEvent, mError);
+            return new TLDataSource(mInitialKey, mAuthUser, mInitialTweetsTLEvent,
+                    mNewTweetsTLEvent, mOlderTweetsTLEvent, mError);
         }
     }
 }

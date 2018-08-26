@@ -1,6 +1,8 @@
 package com.raed.twitterclient.authusers;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Maybe;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 
 
@@ -87,10 +90,17 @@ public class AuthUsersRepository {
     }
 
     @MainThread
-    public void removeUser(AuthUser authUser){
+    public void removeUser(String userID){
+        AuthUser authUser = getUserById(userID);
         List<AuthUser> authUsers = getUsers();
         authUsers.remove(authUser);
         storeUsers(authUsers);
+        if (!mCurrentAuthUser.getUserId().equals(authUser.getUserId()))
+            return;
+        if (authUsers.size() == 0)
+            mCurrentAuthUser = null;
+        else
+            mCurrentAuthUser = authUsers.get(0);
     }
 
     /**
@@ -122,14 +132,15 @@ public class AuthUsersRepository {
                 });
     }
 
-    public void setCurrentUser(AuthUser user){
-        mCurrentAuthUser = user;
-
+    public void setCurrentUser(String id){
         //change the current user, by default the 1st user is considered to be the current user
         List<AuthUser> authUsers = getUsers();
-        authUsers.remove(user);
-        authUsers.add(0, user);
+        AuthUser authUser = getUserById(id);
+        authUsers.remove(authUser);
+        authUsers.add(0, authUser);
         storeUsers(authUsers);
+
+        mCurrentAuthUser = authUser;
     }
 
     public AuthUser getCurrentUser() {

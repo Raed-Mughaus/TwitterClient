@@ -71,7 +71,7 @@ public class AuthActivity extends AppCompatActivity {
         mCompositeDisposable.clear();
     }
 
-    //todo handle time error and other error types, you need to know the code in the response
+    //todo handle time error and other error types
 
     private void handleAuthError(Throwable throwable){
         if (Utils.isOnline(AuthActivity.this)) {
@@ -95,6 +95,8 @@ public class AuthActivity extends AppCompatActivity {
         mWebView.setWebViewClient(new WebViewClient(){
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                //todo make sure the user is redirected to the correct page, otherwise an error will be thrown if the user
+                //entered wrong password
                 String oauthToken = request.getUrl().getQueryParameter("oauth_token");
                 String oauthVerifier = request.getUrl().getQueryParameter("oauth_verifier");
 
@@ -104,8 +106,7 @@ public class AuthActivity extends AppCompatActivity {
                         .subscribe(
                                 user -> {
                                     mViewModel.onNewUser(user);
-                                    finish();
-                                    //todo Do I need to restart the app here?
+                                    Utils.restartApp(AuthActivity.this);
                                 },
                                 AuthActivity.this::handleAuthError
                         );

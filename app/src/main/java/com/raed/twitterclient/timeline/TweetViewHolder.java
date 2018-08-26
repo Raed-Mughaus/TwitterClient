@@ -2,6 +2,7 @@ package com.raed.twitterclient.timeline;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -64,13 +65,26 @@ class TweetViewHolder extends RecyclerView.ViewHolder {
         mRetweeterTextView = itemView.findViewById(R.id.retweeter_name);
 
         mTimelineView = itemView.findViewById(R.id.time_view);
+
+        Handler handler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (mTweet != null){
+                    Date date = mTweet.getTime();
+                    mTimelineView.setText(Utils.getHappenXTimeAgoString(mTweetView.getResources(), date.getTime()));
+                }
+                handler.postDelayed(this, 1000 * 10);
+            }
+        };
+        handler.postDelayed(runnable, 1000 * 10);
     }
 
     void bindTweet(Tweet tweet){
         mTweet = tweet;
         Tweet retweetedTweet = tweet.getRetweetedTweet();
 
-        Date date = tweet.getTime();
+        Date date = mTweet.getTime();
         mTimelineView.setText(Utils.getHappenXTimeAgoString(mTweetView.getResources(), date.getTime()));
 
         int visibility = retweetedTweet == null ? View.GONE : View.VISIBLE;
