@@ -47,7 +47,7 @@ public class TweetsRepository {
             .setDateFormat("EEE MMM dd HH:mm:ss Z yyyy")
             .create();
 
-    TweetsRepository(AuthUser user) {
+    public TweetsRepository(AuthUser user) {
         File file = new File(MyApplication.getApp().getCacheDir(), user.getUserId() + "/" + CACHE_FOLDER);
         mCache = new StringCache(file);
     }

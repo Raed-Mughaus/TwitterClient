@@ -4,4 +4,10 @@
 
     <attr name="backgroundColor" format="color|reference"/>
 
+    <declare-styleable name="SettingsItemView">
+        <attr name="icon" format="reference"/>
+        <attr name="containsSwitch" format="boolean"/>
+        <attr name="title" format="string"/>
+    </declare-styleable>
+
 </resources>

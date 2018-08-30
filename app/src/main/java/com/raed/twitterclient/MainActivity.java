@@ -18,7 +18,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.raed.twitterclient.auth.AuthActivity;
-import com.raed.twitterclient.timeline.TLFragment;
+import com.raed.twitterclient.settings.SettingsActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -92,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.home:
                 mViewPager.setCurrentItem(0);//edit this to be customizable
                 break;
+            case R.id.settings:
+                startActivity(SettingsActivity.newIntent(this));
+                break;
         }
         return true;
     }
@@ -119,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
     private final FragmentPagerAdapter mPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
         @Override
         public Fragment getItem(int position) {
-            return TLFragment.newInstance();
+            return HomeTLFragment.newInstance();
         }
 
         @Override

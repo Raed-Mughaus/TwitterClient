@@ -9,7 +9,6 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowIsTranslucent">true</item>
 
-
         <item name="android:statusBarColor">@color/transparent</item>
 
     </style>
@@ -18,6 +17,11 @@
         <!-- These 2 attributes allow us to draw on the status bar -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@color/transparent</item>
+    </style>
+
+    <style name="PrefTheme" parent="Theme.AppCompat.Light">
+        <item name="android:windowBackground">@color/colorPrimaryDark</item>
+        <item name="android:background">@color/colorPrimary</item>
     </style>
 
     <color name="black">#ff000000</color>

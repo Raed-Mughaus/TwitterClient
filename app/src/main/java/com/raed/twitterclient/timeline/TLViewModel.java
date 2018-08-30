@@ -14,20 +14,23 @@ import com.raed.twitterclient.authusers.AuthUsersRepository;
 import com.raed.twitterclient.model.tweet.Tweet;
 import com.raed.twitterclient.timeline.data.TLDataSource;
 import com.raed.twitterclient.timeline.data.TLPreferences;
+import com.raed.twitterclient.timeline.data.TweetsRepository;
 
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 
-public class TLViewModel extends AndroidViewModel {
+public abstract class TLViewModel extends AndroidViewModel {
 
     private static final String TAG = TLViewModel.class.getSimpleName();
 
-    private LiveData<PagedList<Tweet>> mListLiveData;
-    private MutableLiveData<Exception> mError = new MutableLiveData<>();
+    private LiveData<PagedList<Tweet>> mTweetsPagedList;
+
+    private TLPreferences mTLPreferences;
+
     private MutableLiveData<TLEvent> mInitialTweetsTLEvent = new MutableLiveData<>();
     private MutableLiveData<TLEvent> mNewTweetsTLEvent = new MutableLiveData<>();
     private MutableLiveData<TLEvent> mOldTweetsTLEvent = new MutableLiveData<>();
-    private TLPreferences mTLPreferences;
+    private MutableLiveData<Exception> mError = new MutableLiveData<>();
 
     public TLViewModel(Application application) {
         super(application);
@@ -37,22 +40,23 @@ public class TLViewModel extends AndroidViewModel {
 
         mTLPreferences = new TLPreferences(authUser.getUserId());
 
-        TLDataSource.Factory dataSrcFactory =
-                new TLDataSource.Factory(getInitialLoadKey(), authUser, mInitialTweetsTLEvent,
-                        mNewTweetsTLEvent, mOldTweetsTLEvent, mError);
+        TweetsRepository tweetsRepository = getRepository(authUser);
+        TLDataSource.Factory dataSrcFactory = new TLDataSource.Factory(
+                tweetsRepository, getInitialLoadKey(), mInitialTweetsTLEvent,
+                mNewTweetsTLEvent, mOldTweetsTLEvent, mError);
         Config config = new Config.Builder()
                 .setPageSize(100)//I think this is safer//todo is it ok
                 .build();
-        mListLiveData = new LivePagedListBuilder<>(dataSrcFactory, config)
+        mTweetsPagedList = new LivePagedListBuilder<>(dataSrcFactory, config)
                 .build();
     }
 
     public LiveData<PagedList<Tweet>> getPagedList() {
-        return mListLiveData;
+        return mTweetsPagedList;
     }
 
-    public void saveScrolledToID(long tweetID, int offset){
-        mTLPreferences.saveScrollPosition(tweetID, offset);
+    public void saveScrolledToID(long tweetID){
+        mTLPreferences.saveScrollPosition(tweetID);
     }
 
     public Long getInitialLoadKey() {
@@ -60,10 +64,6 @@ public class TLViewModel extends AndroidViewModel {
         if (initialID == 0)
             initialID = null;
         return initialID;
-    }
-
-    public int getOffset(){
-        return mTLPreferences.getOffset();
     }
 
     public MutableLiveData<Exception> getError() {
@@ -84,7 +84,7 @@ public class TLViewModel extends AndroidViewModel {
 
     public void reloadNewTweets() {
         Log.d(TAG, "reloadNewTweets: ");
-        if (mListLiveData == null)
+        if (mTweetsPagedList == null)
             return;
         Observable
                 .create(emitter -> {
@@ -97,7 +97,7 @@ public class TLViewModel extends AndroidViewModel {
 
     public void reloadOldTweets(){
         Log.d(TAG, "reloadOldTweets: ");
-        if (mListLiveData == null)
+        if (mTweetsPagedList == null)
             return;
         Observable
                 .create(emitter -> {
@@ -110,7 +110,7 @@ public class TLViewModel extends AndroidViewModel {
 
     public void reloadInitialTweets(){
         Log.d(TAG, "reloadInitialTweets: ");
-        if (mListLiveData == null)
+        if (mTweetsPagedList == null)
             return;
         Observable
                 .create(emitter -> {
@@ -122,10 +122,12 @@ public class TLViewModel extends AndroidViewModel {
     }
 
     private TLDataSource getCurrentDataSource(){
-        return (TLDataSource) mListLiveData.getValue().getDataSource();
+        return (TLDataSource) mTweetsPagedList.getValue().getDataSource();
     }
 
     public AuthUser getCurrentUser() {
         return AuthUsersRepository.getInstance().getCurrentUser();
     }
+
+    protected abstract TweetsRepository getRepository(AuthUser user);
 }

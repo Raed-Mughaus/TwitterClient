@@ -2,6 +2,7 @@ package com.raed.twitterclient.timeline;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -32,7 +33,7 @@ import static com.raed.twitterclient.timeline.TLEvent.START_LOADING_TWEETS;
 import static com.raed.twitterclient.timeline.TLEvent.TWEETS_LOADED_SUCCESSFULLY;
 
 
-public class TLFragment extends Fragment{
+public abstract class TLFragment extends Fragment{
 
     private static final String TAG = TLFragment.class.getSimpleName();
 
@@ -42,20 +43,16 @@ public class TLFragment extends Fragment{
     private RecyclerView mRecyclerView;
     private TweetAdapter mTweetAdapter;
 
-    public static Fragment newInstance() {
-        return new TLFragment();
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(TLViewModel.class);
+        mViewModel = getViewModel();
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mRefreshLayout = (SwipeRefreshLayout) inflater.inflate(R.layout.fragment_timeline, container, false);
+        mRefreshLayout = (SwipeRefreshLayout) inflater.inflate(getLayoutResource(), container, false);
         mRefreshLayout.setEnabled(true);
         mRefreshLayout.setOnRefreshListener(this::onRefreshLayoutSwap);
         //todo I should show a retry button at the bottom if an error occur
@@ -87,10 +84,14 @@ public class TLFragment extends Fragment{
         if (index == RecyclerView.NO_POSITION)
             return;
         long currentShownID = mTweetAdapter.getItem(index).getId();
-        int offset = mRecyclerView.computeVerticalScrollOffset() % mRecyclerView.getHeight();
-        mViewModel.saveScrolledToID(currentShownID, offset);
+        mViewModel.saveScrolledToID(currentShownID);
 
     }
+
+    @LayoutRes
+    protected abstract int getLayoutResource();
+
+    protected abstract TLViewModel getViewModel();
 
     private void onRefreshLayoutSwap() {
         TLEvent event = mViewModel.getInitialTweetsTLEvent().getValue();
@@ -170,6 +171,9 @@ public class TLFragment extends Fragment{
         e.printStackTrace();
         if (!(e instanceof HttpException)){
             Toast.makeText(getContext(), "Error type " + e.getClass().getSimpleName(), Toast.LENGTH_LONG).show();
+            Throwable throwable = e.getCause();
+            if(throwable != null)
+                Toast.makeText(getContext(), "Error type " + throwable.getClass().getSimpleName(), Toast.LENGTH_LONG).show();
             return;
         }
         TwitterError[] errors = Utils.extractTwitterErrors((HttpException) e);
@@ -187,7 +191,6 @@ public class TLFragment extends Fragment{
                     Toast.makeText(getContext(), "code = " + error.code, Toast.LENGTH_LONG).show();
                     Toast.makeText(getContext(), "message = " + error.message, Toast.LENGTH_LONG).show();
                     break;
-
             }
         }
     }
@@ -198,7 +201,5 @@ public class TLFragment extends Fragment{
             return;
         int index = mTweetAdapter.getCurrentList().indexOf(new Tweet(id));
         mRecyclerView.scrollToPosition(index);
-        //mRecyclerView.scrollBy(0, mViewModel.getOffset());
     }
-
 }

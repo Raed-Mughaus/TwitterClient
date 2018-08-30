@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.raed.twitterclient.HomeTLFragment;
 import com.raed.twitterclient.R;
 import com.raed.twitterclient.model.User;
 import com.raed.twitterclient.hashtaghelper.HashTagHelper;
@@ -104,7 +105,7 @@ public class ProfileActivity extends AppCompatActivity {
             public Fragment getItem(int position) {
                 switch (position){
                     case 0:
-                        return TLFragment.newInstance();
+                        return HomeTLFragment.newInstance();
                     case 1:
                         return UsersListFragment.newInstance(getIntent().getStringExtra(KEY_USER_ID), UserService.UserRelation.FOLLOWING);
                     case 2:

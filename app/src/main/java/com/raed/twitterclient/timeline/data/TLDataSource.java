@@ -40,32 +40,31 @@ public class TLDataSource extends PageKeyedDataSource<Long, Tweet>{
     private LoadCallback<Long, Tweet> mAfterCallback;
     private LoadParams<Long> mAfterParams;
 
-    private TLDataSource(Long initialKey, AuthUser user,
+    private TLDataSource(TweetsRepository tweetsRepository,
+                         Long initialKey,
                          MutableLiveData<TLEvent> initialTweetsTLEvent,
                          MutableLiveData<TLEvent> newTweetsTLEvent,
                          MutableLiveData<TLEvent> oldTweetsTLEvent,
                          MutableLiveData<Exception> error) {
+        mRepository = tweetsRepository;
         mInitialKey = initialKey;
         mInitialTweetsTLEvent = initialTweetsTLEvent;
         mNewTweetsTLEvent = newTweetsTLEvent;
         mOldTweetsTLEvent = oldTweetsTLEvent;
         mError = error;
-        mRepository = new TweetsRepository(user);
     }
-    //logic -> event -> errors
+
     @Override
-    public void loadInitial(@NonNull LoadInitialParams<Long> params, @NonNull LoadInitialCallback<Long, Tweet> callback) {
-        Log.d(TAG, "loadInitial:");
+    public void loadInitial(@NonNull LoadInitialParams<Long> params,
+                            @NonNull LoadInitialCallback<Long, Tweet> callback) {
+        Log.d(TAG, "loadInitial: ");
         TweetList tweetList = null;
         try {
             mInitialTweetsTLEvent.postValue(TLEvent.START_LOADING_TWEETS);
-            if (mInitialKey == null) {
-                tweetList = mRepository.getTweets();
-            } else {
+            if (mInitialKey != null)
                 tweetList = mRepository.getTweetsThatInclude(mInitialKey);
-                if (tweetList == null)
-                    tweetList = mRepository.getTweets();
-            }
+            if (tweetList == null)
+                tweetList = mRepository.getTweets();
         }
         catch (IOException e) { Crashlytics.logException(e);}
         catch (Exception e){
@@ -86,7 +85,8 @@ public class TLDataSource extends PageKeyedDataSource<Long, Tweet>{
     }
 
     @Override
-    public void loadBefore(@NonNull LoadParams<Long> params, @NonNull LoadCallback<Long, Tweet> callback) {
+    public void loadBefore(@NonNull LoadParams<Long> params,
+                           @NonNull LoadCallback<Long, Tweet> callback) {
         Log.d(TAG, "loadBefore: ");
         TweetList tweetList = null;
         try {
@@ -112,7 +112,8 @@ public class TLDataSource extends PageKeyedDataSource<Long, Tweet>{
     }
 
     @Override
-    public void loadAfter(@NonNull LoadParams<Long> params, @NonNull LoadCallback<Long, Tweet> callback) {
+    public void loadAfter(@NonNull LoadParams<Long> params,
+                          @NonNull LoadCallback<Long, Tweet> callback) {
         Log.d(TAG, "loadAfter: " + params.key);
         TweetList tweetList = null;
         try {
@@ -139,7 +140,7 @@ public class TLDataSource extends PageKeyedDataSource<Long, Tweet>{
     public void retryToLoadInitialTweets(){
         Log.d(TAG, "retryToLoadInitialTweets:");
         if (mInitialCallback == null){
-            throw new IllegalStateException("Trying to load ");
+            throw new IllegalStateException("Trying to load data in inappropriate state");
         }
         LoadInitialCallback<Long, Tweet> loadCallback = mInitialCallback;
         LoadInitialParams<Long> loadParams = mInitialParams;
@@ -152,7 +153,7 @@ public class TLDataSource extends PageKeyedDataSource<Long, Tweet>{
     public void retryToLoadNewTweets(){
         Log.d(TAG, "retryToLoadNewTweets: ");
         if (mBeforeCallback == null){
-            throw new IllegalStateException("Trying to load ");
+            throw new IllegalStateException("Trying to load in inappropriate state");
         }
         LoadCallback<Long, Tweet> loadCallback = mBeforeCallback;
         LoadParams<Long> loadParams = mBeforeParams;
@@ -165,7 +166,7 @@ public class TLDataSource extends PageKeyedDataSource<Long, Tweet>{
     public void retryToLoadOldTweets(){
         Log.d(TAG, "retryToLoadOldTweets: ");
         if (mAfterCallback == null){
-            throw new IllegalStateException("Trying to load ");
+            throw new IllegalStateException("Trying to load in inappropriate state");
         }
         LoadCallback<Long, Tweet> loadCallback = mAfterCallback;
         LoadParams<Long> loadParams = mAfterParams;
@@ -176,21 +177,22 @@ public class TLDataSource extends PageKeyedDataSource<Long, Tweet>{
 
     public static class Factory extends DataSource.Factory<Long, Tweet>{
 
+        private TweetsRepository mRepository;
         private Long mInitialKey;
 
         private MutableLiveData<TLEvent> mInitialTweetsTLEvent;
         private MutableLiveData<TLEvent> mNewTweetsTLEvent;
         private MutableLiveData<TLEvent> mOlderTweetsTLEvent;
         private MutableLiveData<Exception> mError;
-        private AuthUser mAuthUser;
 
-        public Factory(Long initialKey, AuthUser authUser,
+        public Factory(TweetsRepository repository,
+                       Long initialKey,
                        MutableLiveData<TLEvent> initialTweetsTLEvent,
                        MutableLiveData<TLEvent> newTweetsTLEvent,
                        MutableLiveData<TLEvent> olderTweetsTLEvent,
                        MutableLiveData<Exception> error) {
+            mRepository = repository;
             mInitialKey = initialKey;
-            mAuthUser = authUser;
             mInitialTweetsTLEvent = initialTweetsTLEvent;
             mNewTweetsTLEvent = newTweetsTLEvent;
             mOlderTweetsTLEvent = olderTweetsTLEvent;
@@ -200,7 +202,7 @@ public class TLDataSource extends PageKeyedDataSource<Long, Tweet>{
 
         @Override
         public DataSource<Long, Tweet> create() {
-            return new TLDataSource(mInitialKey, mAuthUser, mInitialTweetsTLEvent,
+            return new TLDataSource(mRepository, mInitialKey, mInitialTweetsTLEvent,
                     mNewTweetsTLEvent, mOlderTweetsTLEvent, mError);
         }
     }

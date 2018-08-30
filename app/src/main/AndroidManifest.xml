@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.raed.twitterclient">
 
-   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -13,7 +13,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,13 +20,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".auth.AuthActivity"/>
-
+        <activity android:name=".auth.AuthActivity" />
         <activity
             android:name=".profile.ProfileActivity"
-            android:theme="@style/AppTheme.ProfileActivityTheme"/>
-
+            android:theme="@style/AppTheme.ProfileActivityTheme" />
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AppCompat.Light">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.raed.twitterclient.MainActivity" />
+        </activity>
+        <activity android:name=".settings.PagesActivity"></activity>
     </application>
 
 </manifest>
