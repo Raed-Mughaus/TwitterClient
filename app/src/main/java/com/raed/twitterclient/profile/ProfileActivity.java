@@ -13,23 +13,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.raed.twitterclient.HomeTLFragment;
 import com.raed.twitterclient.R;
 import com.raed.twitterclient.model.User;
-import com.raed.twitterclient.hashtaghelper.HashTagHelper;
-import com.raed.twitterclient.retrofitservices.UserService;
-import com.raed.twitterclient.timeline.TLFragment;
-import com.raed.twitterclient.userlist.UsersListFragment;
+import com.raed.twitterclient.api.UserService;
+import com.raed.twitterclient.timeline.user_timeline.UserTLFragment;
+import com.raed.twitterclient.user_list.UsersListFragment;
 
 import java.util.Objects;
 
@@ -44,20 +39,17 @@ public class ProfileActivity extends AppCompatActivity {
 
     private ProfileViewModel mViewModel;
 
-    private TextView mFollowersView;
-    private TextView mFollowingView;
-    private TextView mTweetsCountView;
     private ImageView mProfileImageView;
     private ImageView mBannerImageView;
     private TextView mNameView;
     private TextView mScreenNameView;
     private TextView mDescriptionView;
     private TextView mLocationView;
+    private View mLocationIcon;
     private TextView mUrlView;
-    private ImageView mVerifiedAccountView;
+    private View mUrlIcon;
     private Disposable mDisposable;
     private Button mFollowButton;
-    private ImageButton mDMButton;
 
     public static Intent newIntent(Context context, String userID){
         Intent intent = new Intent(context, ProfileActivity.class);
@@ -69,9 +61,6 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.inflateMenu(R.menu.activity_profile);
 
         CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsing_tool_bar);
         AppBarLayout appBarLayout = findViewById(R.id.appbar);
@@ -85,9 +74,6 @@ public class ProfileActivity extends AppCompatActivity {
         mViewModel = ViewModelProviders
                 .of(this)
                 .get(ProfileViewModel.class);
-        /*mRecyclerView = findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(new StringAdapter());*/
 
         mNameView = findViewById(R.id.name_text_view);
         mScreenNameView = findViewById(R.id.screen_name_text_view);
@@ -95,9 +81,13 @@ public class ProfileActivity extends AppCompatActivity {
 
         mProfileImageView = findViewById(R.id.profile_image_view);
         mLocationView = findViewById(R.id.location_text_view);
+        mLocationIcon = findViewById(R.id.location_icon);
         mUrlView = findViewById(R.id.website_text_view);
+        mUrlIcon = findViewById(R.id.website_icon);
 
         mBannerImageView = findViewById(R.id.banner_image_view);
+
+        String userID = getIntent().getStringExtra(KEY_USER_ID);
 
         ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
@@ -105,7 +95,7 @@ public class ProfileActivity extends AppCompatActivity {
             public Fragment getItem(int position) {
                 switch (position){
                     case 0:
-                        return HomeTLFragment.newInstance();
+                        return UserTLFragment.newInstance(userID);
                     case 1:
                         return UsersListFragment.newInstance(getIntent().getStringExtra(KEY_USER_ID), UserService.UserRelation.FOLLOWING);
                     case 2:
@@ -121,7 +111,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         });
 
-        mDisposable = mViewModel.getUser(getIntent().getStringExtra(KEY_USER_ID))
+        mDisposable = mViewModel.getUser(userID)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         this::updateUI,
@@ -166,38 +156,21 @@ public class ProfileActivity extends AppCompatActivity {
 
         if (user.getDescription() != null) {
             mDescriptionView.setText(user.getDescription());
-            HashTagHelper hashTagHelper = HashTagHelper
-                    .Creator.create(0xff2187bb,
-                            hashTag -> Toast.makeText(ProfileActivity.this, hashTag,
-                                    Toast.LENGTH_SHORT).show(), '_');
-            hashTagHelper.handle(mDescriptionView);
         }
 
-        if (user.getLocation() != null)
+        if (user.getLocation() != null && user.getLocation().length() > 0) {
             mLocationView.setText(user.getLocation());
-        else {
+        } else {
             mLocationView.setVisibility(View.GONE);
+            mLocationIcon.setVisibility(View.GONE);
         }
 
-        if (user.getUrl() != null)
+        if (user.getUrl() != null) {
             mUrlView.setText(user.getUrl());
-
-       /* mFollowersView.setText(Utils.format(user.getFollowersCount()));
-        mFollowingView.setText(Utils.format(user.getFriendsCount()));
-        mTweetsCountView.setText(Utils.format(user.getStatusesCount()));*/
-        //todo what image library should I use, think of the RecyclerView
-        /*mProfileImageView;
-        mBannerImageView;
-        mUserNameView;
-        mScreenNameView;
-        mDescriptionView;*/
-       /* if (user.getLocation() != null)
-            mLocationView.setText(user.getLocation());
-        else
-           ;// mLocationView.setVisibility();*/
-        //   mUrlView.setText(user.getUrl());
-        // mVerifiedAccountView.setVisibility(user.isVerified() ? View.VISIBLE : View.GONE);
-
+        } else{
+            mUrlIcon.setVisibility(View.GONE);
+            mUrlView.setVisibility(View.GONE);
+        }
     }
 
     @Override

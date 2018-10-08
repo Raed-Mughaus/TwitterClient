@@ -1,20 +1,15 @@
 package com.raed.twitterclient.utilis;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.raed.twitterclient.MainActivity;
 import com.raed.twitterclient.R;
-import com.raed.twitterclient.TwitterErrors;
-import com.raed.twitterclient.TwitterErrors.TwitterError;
+import com.raed.twitterclient.api.TwitterErrors;
+import com.raed.twitterclient.api.TwitterErrors.TwitterError;
 
 import java.io.IOException;
 import java.util.Map;
@@ -36,7 +31,6 @@ public class Utils {
         }
     };
 
-    //todo continue testing this method in intellij
     public static String getHappenXTimeAgoString(Resources resources, long happenAt){
         long now = System.currentTimeMillis();
         long since = now - happenAt;
@@ -91,38 +85,4 @@ public class Utils {
         return ((TwitterErrors) new Gson().fromJson(responseStr, typeToken.getType())).errors;
     }
 
-    public static void restartApp(Context context){
-        Intent activityIntent = new Intent(context, MainActivity.class);
-        int mPendingIntentId = 123456;
-        PendingIntent restartPendingIntent = PendingIntent.getActivity(context, mPendingIntentId,
-                activityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        AlarmManager mgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mgr.setExactAndAllowWhileIdle(AlarmManager.RTC, System.currentTimeMillis() + 100, restartPendingIntent);
-        }else
-            mgr.setExact(AlarmManager.RTC, System.currentTimeMillis() + 100, restartPendingIntent);
-        System.exit(0);
-    }
-
-    /*public static Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
-        Bitmap output = Bitmap
-                .createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-
-        final int color = 0xff424242;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        final RectF rectF = new RectF(rect);
-
-
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-
-        return output;
-    }*/
 }

@@ -3,13 +3,12 @@ package com.raed.twitterclient.auth;
 
 import android.arch.lifecycle.ViewModel;
 
-import com.raed.twitterclient.x.AppTokenAndSecret;
-import com.raed.twitterclient.authusers.AuthUser;
-import com.raed.twitterclient.retrofitservices.RetrofitServices;
-import com.raed.twitterclient.authusers.AuthUsersRepository;
-import com.raed.twitterclient.authheader.AuthHeaderGenerator;
-import com.raed.twitterclient.authheader.SignatureGenerator;
-import com.raed.twitterclient.retrofitservices.AuthService;
+import com.raed.twitterclient.auth.authorized_user.AuthUser;
+import com.raed.twitterclient.api.RetrofitServices;
+import com.raed.twitterclient.auth.authorized_user.CurrentAuthUser;
+import com.raed.twitterclient.auth.auth_header.AuthHeaderGenerator;
+import com.raed.twitterclient.auth.auth_header.SignatureGenerator;
+import com.raed.twitterclient.api.AuthService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,15 +29,14 @@ public class AuthViewModel extends ViewModel {
         super();
         mAuthService = RetrofitServices.getInstance().getAuthService();
 
-        AppTokenAndSecret tokenAndSecret = new AppTokenAndSecret();
-        mConsumerKey = tokenAndSecret.getAppKey();
-        mConsumerSecret = tokenAndSecret.getAppSecret();
+        mConsumerKey = APIKeys.API_KEY;
+        mConsumerSecret = APIKeys.API_SECRET_KEY;
     }
 
     Single<AuthUser> onUserRedirected(String oauthToken, String oauthVerifier){
 
-        SignatureGenerator signatureGenerator = new SignatureGenerator(mConsumerSecret, null);
-        AuthHeaderGenerator headerGenerator = new AuthHeaderGenerator(mConsumerKey, oauthToken, signatureGenerator);
+        SignatureGenerator signatureGenerator = new SignatureGenerator(null);
+        AuthHeaderGenerator headerGenerator = new AuthHeaderGenerator(oauthToken, signatureGenerator);
 
         Map<String, String> additionalParams = new HashMap<>();
         additionalParams.put("oauth_verifier", oauthVerifier);
@@ -62,8 +60,8 @@ public class AuthViewModel extends ViewModel {
     }
 
     Single<String[]> requestToken() {
-        SignatureGenerator signatureGenerator = new SignatureGenerator(mConsumerSecret, null);
-        AuthHeaderGenerator headerGenerator = new AuthHeaderGenerator(mConsumerKey, null, signatureGenerator);
+        SignatureGenerator signatureGenerator = new SignatureGenerator(null);
+        AuthHeaderGenerator headerGenerator = new AuthHeaderGenerator(null, signatureGenerator);
         String authorizationHeader =
                 headerGenerator.generateAuthHeader("POST", "https://api.twitter.com/oauth/request_token", null, null);
         return mAuthService
@@ -77,6 +75,6 @@ public class AuthViewModel extends ViewModel {
     }
 
     void onNewUser(AuthUser authUser){
-        AuthUsersRepository.getInstance().addUser(authUser);
+        CurrentAuthUser.getInstance().set(authUser);
     }
 }

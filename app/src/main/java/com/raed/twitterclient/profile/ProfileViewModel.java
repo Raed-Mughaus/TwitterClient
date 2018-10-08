@@ -3,11 +3,11 @@ package com.raed.twitterclient.profile;
 
 import android.arch.lifecycle.ViewModel;
 
-import com.raed.twitterclient.authusers.AuthUser;
-import com.raed.twitterclient.authusers.AuthUsersRepository;
+import com.raed.twitterclient.auth.authorized_user.AuthUser;
+import com.raed.twitterclient.auth.authorized_user.CurrentAuthUser;
 import com.raed.twitterclient.model.User;
-import com.raed.twitterclient.retrofitservices.RetrofitServices;
-import com.raed.twitterclient.retrofitservices.UserService;
+import com.raed.twitterclient.api.RetrofitServices;
+import com.raed.twitterclient.api.UserService;
 
 import io.reactivex.Single;
 
@@ -18,7 +18,7 @@ public class ProfileViewModel extends ViewModel {
     private UserService mUserService;
 
     public ProfileViewModel() {
-        mUser = AuthUsersRepository.getInstance().getCurrentUser();
+        mUser = CurrentAuthUser.getInstance().get();
         mUserService = RetrofitServices.getInstance().getUserService();
     }
 

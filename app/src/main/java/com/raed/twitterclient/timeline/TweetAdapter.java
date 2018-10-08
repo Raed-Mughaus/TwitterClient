@@ -11,9 +11,9 @@ import android.view.ViewGroup;
 import com.raed.twitterclient.R;
 import com.raed.twitterclient.model.tweet.Tweet;
 
-class TweetAdapter extends PagedListAdapter<Tweet, TweetViewHolder> {
+public class TweetAdapter extends PagedListAdapter<Tweet, TweetViewHolder> {
 
-    TweetAdapter() {
+    public TweetAdapter() {
         super(new MyDiffCallback());
     }
 

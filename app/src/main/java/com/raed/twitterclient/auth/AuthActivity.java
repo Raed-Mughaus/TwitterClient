@@ -11,7 +11,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.raed.twitterclient.utilis.Crashlytics;
+
 import com.raed.twitterclient.R;
 import com.raed.twitterclient.utilis.Utils;
 
@@ -83,7 +83,7 @@ public class AuthActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-            Crashlytics.logException(new Exception(throwable));
+            Log.e(TAG, "handleAuthError: ", throwable);
             Toast.makeText(AuthActivity.this, R.string.error_happened_in_authentication, Toast.LENGTH_LONG).show();
         } else
             Toast.makeText(AuthActivity.this, R.string.no_internet_connection, Toast.LENGTH_LONG).show();
@@ -106,7 +106,7 @@ public class AuthActivity extends AppCompatActivity {
                         .subscribe(
                                 user -> {
                                     mViewModel.onNewUser(user);
-                                    Utils.restartApp(AuthActivity.this);
+                                    finish();
                                 },
                                 AuthActivity.this::handleAuthError
                         );

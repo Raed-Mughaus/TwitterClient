@@ -13,7 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".timeline.home_timeline.HomeTLActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,18 +24,8 @@
         <activity
             android:name=".profile.ProfileActivity"
             android:theme="@style/AppTheme.ProfileActivityTheme" />
-        <activity
-            android:name=".settings.SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/Base.Theme.AppCompat.Light.DarkActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.raed.twitterclient.MainActivity" />
-        </activity>
-        <activity
-            android:name=".settings.PagesActivity"
-            android:theme="@style/Base.Theme.AppCompat.Light.DarkActionBar"/>
+        <activity android:name=".media.VideoActivity" />
+        <activity android:name=".media.ImagesActivity"></activity>
     </application>
 
 </manifest>

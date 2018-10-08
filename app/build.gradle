@@ -26,11 +26,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    externalNativeBuild {
-        cmake {
-            path 'CMakeLists.txt'
-        }
-    }
     buildToolsVersion '28.0.1'
 }
 
@@ -43,6 +38,9 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
+
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.7.3'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.7.3'
 
     def retrofitVersion = '2.4.0'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"

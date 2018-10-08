@@ -15,8 +15,4 @@ public class MyApplication extends Application {
         sMyApplication = this;
         super.onCreate();
     }
-
-
-
 }
-
