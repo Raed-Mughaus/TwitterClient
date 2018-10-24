@@ -75,7 +75,7 @@ public class RetrofitServices {
 
         if (BuildConfig.DEBUG)
             okHttpClientBuilder.addInterceptor(new MyLogInterceptor());
-        Scheduler scheduler = Schedulers.from(Executors.newFixedThreadPool(10));//todo should I stick with .io() instead
+        Scheduler scheduler = Schedulers.from(Executors.newFixedThreadPool(10));//todo should I use .io() instead
         mRetrofit = new Retrofit.Builder()
                 .baseUrl("https://api.twitter.com/1.1/")
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(scheduler))

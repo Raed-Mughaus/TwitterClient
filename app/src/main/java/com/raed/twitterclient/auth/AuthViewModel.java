@@ -22,15 +22,10 @@ public class AuthViewModel extends ViewModel {
     private static final String TAG = "AuthViewModel";
 
     private AuthService mAuthService;
-    private String mConsumerKey;
-    private String mConsumerSecret;
 
     public AuthViewModel() {
         super();
         mAuthService = RetrofitServices.getInstance().getAuthService();
-
-        mConsumerKey = APIKeys.API_KEY;
-        mConsumerSecret = APIKeys.API_SECRET_KEY;
     }
 
     Single<AuthUser> onUserRedirected(String oauthToken, String oauthVerifier){
@@ -74,7 +69,7 @@ public class AuthViewModel extends ViewModel {
                 });
     }
 
-    void onNewUser(AuthUser authUser){
+    void onUserSignedIn(AuthUser authUser){
         CurrentAuthUser.getInstance().set(authUser);
     }
 }

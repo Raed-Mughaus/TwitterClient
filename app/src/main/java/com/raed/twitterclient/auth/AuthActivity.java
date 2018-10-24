@@ -105,8 +105,8 @@ public class AuthActivity extends AppCompatActivity {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
                                 user -> {
-                                    mViewModel.onNewUser(user);
-                                    finish();
+                                    mViewModel.onUserSignedIn(user);
+                                    System.exit(0);
                                 },
                                 AuthActivity.this::handleAuthError
                         );
